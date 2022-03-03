@@ -20,4 +20,36 @@ async function getRepertorio() {
     return res.rows
 }
 
-module.exports = { getRepertorio }
+async function insertarRepertorio(cancion, artista, tono) {
+    const client = await pool.connect()
+  // ejemplo de consulta con 2 parámetros
+    const res = await client.query(
+        "insert into repertorio (cancion, artista, tono) values ($1, $2, $3) returning *",
+        [cancion, artista, tono]
+    )
+    client.release()
+}
+
+async function editarRepertorio (id, cancion, artista, tono) {
+    const client = await pool.connect()
+
+    const res = await client.query({
+        text: "update repertorio set cancion=$2, artista=$3, tono=$4 where id=$1",
+        values: [id, cancion, artista, tono]
+    })
+
+    client.release()
+    return res
+}
+
+async function eliminarRepertorio(id) {
+    const client = await pool.connect()
+    // ejemplo de consulta con 2 parámetros
+    const res = await client.query(
+        "delete from repertorio where id=$1",
+        [id]
+    )
+    client.release()
+}
+
+module.exports = { getRepertorio, insertarRepertorio, editarRepertorio, eliminarRepertorio }
