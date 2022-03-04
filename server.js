@@ -5,8 +5,13 @@ const app = express()
 app.use(express.static('static'))
 
 app.get('/canciones', async (req, res) => {
-    const canciones = await getRepertorio();
-    res.send(canciones)
+
+    try {
+        const canciones = await getRepertorio();
+        res.send(canciones)
+    } catch (error) {
+        return res.status(400).send(error.message)
+    }
 });
 
 app.post('/cancion', async (req, res) => {
@@ -19,11 +24,13 @@ app.post('/cancion', async (req, res) => {
     req.on("end", async () => {
 
         const datos = Object.values(JSON.parse(body));
-
-        const nuevoRep = await insertarRepertorio(datos[0], datos[1], datos[2])
-        //console.log(datos)
-        res.status(201)
-        res.send(nuevoRep)
+        try {
+            const nuevoRep = await insertarRepertorio(datos[0], datos[1], datos[2])
+            res.status(201)
+            res.send(nuevoRep)
+        } catch (error) {
+            return res.status(400).send(error.message)
+        }
     })
 })
 
@@ -35,17 +42,22 @@ app.put('/cancion', async (req, res) => {
     })
 
     req.on("end", async () => {
-
         const datos = Object.values(JSON.parse(body));
-
-        await editarRepertorio(datos[0], datos[1], datos[2], datos[3])
-        console.log(datos)
+        try {
+            await editarRepertorio(datos[0], datos[1], datos[2], datos[3])
+        } catch (error) {
+            return res.status(400).send(error.message)
+        }
         res.send(datos)
     })
 })
 
 app.delete('/cancion', async (req, res) => {
-    await eliminarRepertorio(req.query.id)
+    try {
+        await eliminarRepertorio(req.query.id)
+    } catch(error) {
+        return res.status(400).send(error.message)
+    }
     res.send('repertorio eliminado de manera exitosa')
 });
 
